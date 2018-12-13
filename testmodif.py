@@ -1,259 +1,245 @@
-#CREATION DU LABYRINTHE 
-#générer des cases
-
-
-#GENERATION DES OBJETS
-#Les objets peuvent apparaitre au hasard sur n'importe quel case non-mur qui n'est ni l'arrivée ni le départ
-
-#DEPLACEMENT DU JOUEUR
-#le joueur commence au départ
-#si le joueur veut se déplacer vers une case mur, il ne peut pas
-#si le joueur se déplace vers une case non mur, il se positionne effectivement sur cette case
-#si le joueur se déplace sur la case arrivée avec tout les objets, il gagne. Sinon, il meurt.
-#si le joueur se déplace sur une case objet, il ramasse cet objet
-
 import random
 import pygame
 from pygame.locals import *
 
-class Labyrinthe:
+class Maze:
 
    ### CONSTRUCTEUR #####################################################################################################
 
     def __init__(self):
         self.cases = []
-        self.objets = []
-        self.cases_vides = []
-        self.cases_mur = []
-        self.case_depart = []
-        self.case_arrivee = []
+        self.items = []
+        self.empty_cases = []
+        self.wall_case = []
+        self.start_case = []
+        self.finish_case = []
 
-        self.load_map("Labyrinthe.txt")
+        self.load_map("Maze.txt")
 
-        #On génère les objets et on les stock dans la liste self.objets
-        self.aiguille = random.choice(self.cases_vides)
-        self.tube = random.choice(self.cases_vides)
-        self.ether = random.choice(self.cases_vides)
+        #Generate items, and store them in self.items
+        self.needle = random.choice(self.empty_cases)
+        self.tube = random.choice(self.empty_cases)
+        self.ether = random.choice(self.empty_cases)
 
-        #tant que deux objets sont sur la meme case, on les génère de nouveau
+        #if two items are on the same case, we generate them again
         #TODO: regenerer uniquement l'objet qui se trouve sur un autre - utiliser del 
-        while self.tube == self.aiguille or self.tube == self.ether or self.ether == self.aiguille:
-            self.aiguille = random.choice(self.cases_vides)
-            self.tube = random.choice(self.cases_vides)
-            self.ether = random.choice(self.cases_vides)
+        while self.tube == self.needle or self.tube == self.ether or self.ether == self.needle:
+            self.needle = random.choice(self.empty_cases)
+            self.tube = random.choice(self.empty_cases)
+            self.ether = random.choice(self.empty_cases)
 
 
 
-    #On stock les cases dans la liste self.cases
+    #Storing cases in self.cases
     def load_map(self,filename):
-        with open(filename,"r") as fichier:
-            for ligne in fichier.readlines():
-                liste = ligne.split()
-                self.cases.append(liste)
-            for ligne in self.cases:
+        with open(filename,"r") as my_file:
+            for line in my_file.readlines():
+                my_list = line.split()
+                self.cases.append(my_list)
+            for line in self.cases:
                 i = 0
-                i_line = self.cases.index(ligne)
-                for case in ligne:
+                i_line = self.cases.index(line)
+                for case in line:
                     if "vide" == case:
-                        self.cases_vides.append([i,i_line]) 
+                        self.empty_cases.append([i,i_line]) 
                     if "mur" == case:
-                        self.cases_mur.append([i,i_line])
+                        self.wall_case.append([i,i_line])
                     if "depart" == case:
-                        self.case_depart.append([i,i_line])
+                        self.start_case.append([i,i_line])
                     if "arrivee" == case:
-                        self.case_arrivee.append([i,i_line])
+                        self.finish_case.append([i,i_line])
                     i += 1
         
 
     ### INTERFACE GRAPHIQUE ###############################################################################################
     #TODO: faire classe IG 
-    def interface_graphique(self):
+    def graphic_interface(self):
     
         pygame.init()
 
-        taille_case = 40
-        fenetre = pygame.display.set_mode((15*taille_case,16*taille_case))
+        case_size = 40
+        window = pygame.display.set_mode((15*case_size,16*case_size))
  
-        def afficher_cases(self):
+        def display_cases(self):
 
-            # chargement et affichage des cases vides
+            # loading and display of empty cases
             #TODO: charger les cases une seule fois dans une méthode de chargement
-            self.img_case_vide = pygame.image.load("case-vide-40.png").convert()
-            self.img_case_vide = pygame.transform.scale(self.img_case_vide, (taille_case, taille_case))
+            self.img_empty_case = pygame.image.load("case-vide-40.png").convert()
+            self.img_empty_case = pygame.transform.scale(self.img_empty_case, (case_size, case_size))
 
-            # chargement et affichage des cases mur
+            # loading and display of wall cases
             self.img_case_mur= pygame.image.load("case-mur-40.png").convert()
-            self.img_case_mur = pygame.transform.scale(self.img_case_mur, (taille_case, taille_case))
+            self.img_case_mur = pygame.transform.scale(self.img_case_mur, (case_size, case_size))
  
-            # chargement et affichage du départ
-            self.img_case_depart = pygame.image.load("case-depart-40.png").convert()
-            self.img_case_depart = pygame.transform.scale(self.img_case_depart, (taille_case, taille_case))
+            # loading and display of start
+            self.img_start_case = pygame.image.load("case-depart-40.png").convert()
+            self.img_start_case = pygame.transform.scale(self.img_start_case, (case_size, case_size))
   
-            # chargement et affichage de l'arrivée
-            self.img_case_arrivee = pygame.image.load("case-arrivee-40.png").convert()
-            self.img_case_arrivee = pygame.transform.scale(self.img_case_arrivee, (taille_case, taille_case))
+            # loading and display of finish
+            self.img_finish_case = pygame.image.load("case-arrivee-40.png").convert()
+            self.img_finish_case = pygame.transform.scale(self.img_finish_case, (case_size, case_size))
 
             y = 0
-            for ligne in self.cases:
+            for line in self.cases:
                 x = 0
-                for case in ligne:
+                for case in line:
                     if case == "vide":
-                        fenetre.blit(self.img_case_vide, (x*taille_case, y*taille_case))
+                        window.blit(self.img_empty_case, (x*case_size, y*case_size))
                     if case == "mur":
-                        fenetre.blit(self.img_case_mur, (x*taille_case, y*taille_case))
+                        window.blit(self.img_case_mur, (x*case_size, y*case_size))
                     if case == "depart":
-                        fenetre.blit(self.img_case_depart, (x*taille_case, y*taille_case))
+                        window.blit(self.img_start_case, (x*case_size, y*case_size))
                     if case == "arrivee":
-                        fenetre.blit(self.img_case_arrivee, (x*taille_case, y*taille_case))
+                        window.blit(self.img_finish_case, (x*case_size, y*case_size))
                     x += 1
                 y += 1
 
 
 
 
-        # chargement et affichage des objets
-        self.objets_collectes = [] #liste des objets collectés
+        # loading and display of items
+        self.collected_items = [] #list of collected items
         self.img_ether = pygame.image.load("ether-40.png")
-        self.img_ether = pygame.transform.scale(self.img_ether, (taille_case, taille_case))
+        self.img_ether = pygame.transform.scale(self.img_ether, (case_size, case_size))
         self.img_ether.set_colorkey((255,255,255))
-        self.img_aiguille = pygame.image.load("aiguille-40.png")
-        self.img_aiguille = pygame.transform.scale(self.img_aiguille, (taille_case, taille_case))
-        self.img_aiguille.set_colorkey((255,255,255))
+        self.img_needle = pygame.image.load("needle-40.png")
+        self.img_needle = pygame.transform.scale(self.img_needle, (case_size, case_size))
+        self.img_needle.set_colorkey((255,255,255))
         self.img_tube = pygame.image.load("tube-40.png")
-        self.img_tube = pygame.transform.scale(self.img_tube, (taille_case, taille_case))
+        self.img_tube = pygame.transform.scale(self.img_tube, (case_size, case_size))
         self.img_tube.set_colorkey((255,255,255))
-        pos_img_ether_x = taille_case*(self.ether[0])
-        pos_img_ether_y = taille_case*(self.ether[1])
-        pos_img_aiguille_x = taille_case*(self.aiguille[0])
-        pos_img_aiguille_y = taille_case*(self.aiguille[1])
-        pos_img_tube_x = taille_case*(self.tube[0])
-        pos_img_tube_y = taille_case*(self.tube[1])
+        pos_img_ether_x = case_size*(self.ether[0])
+        pos_img_ether_y = case_size*(self.ether[1])
+        pos_img_needle_x = case_size*(self.needle[0])
+        pos_img_needle_y = case_size*(self.needle[1])
+        pos_img_tube_x = case_size*(self.tube[0])
+        pos_img_tube_y = case_size*(self.tube[1])
         position_ether = self.img_ether.get_rect(topleft=(pos_img_ether_x,pos_img_ether_y))
-        position_aiguille = self.img_aiguille.get_rect(topleft=(pos_img_aiguille_x,pos_img_aiguille_y))
+        position_needle = self.img_needle.get_rect(topleft=(pos_img_needle_x,pos_img_needle_y))
         position_tube = self.img_tube.get_rect(topleft=(pos_img_tube_x,pos_img_tube_y))
-        fenetre.blit(self.img_ether, position_ether)
-        fenetre.blit(self.img_aiguille, position_aiguille)
-        fenetre.blit(self.img_tube, position_tube)
+        window.blit(self.img_ether, position_ether)
+        window.blit(self.img_needle, position_needle)
+        window.blit(self.img_tube, position_tube)
 
-        # chargement et affichage du gardien
-        self.img_gardien = pygame.image.load("gardien-40.png").convert()
-        self.img_gardien = pygame.transform.scale(self.img_gardien, (taille_case, taille_case))
-        self.img_gardien.set_colorkey((255,255,255))
-        position_gardien = self.img_gardien.get_rect(topleft=(self.case_arrivee[0][0]*taille_case,(self.case_arrivee[0][1]-1)*taille_case))
-        fenetre.blit(self.img_gardien, position_gardien)
-        coordonnee_gardien = [position_gardien[0]/taille_case,position_gardien[1]/taille_case]
+        # loading and display of warden
+        self.img_warden = pygame.image.load("gardien-40.png").convert()
+        self.img_warden = pygame.transform.scale(self.img_warden, (case_size, case_size))
+        self.img_warden.set_colorkey((255,255,255))
+        position_warden = self.img_warden.get_rect(topleft=(self.finish_case[0][0]*case_size,(self.finish_case[0][1]-1)*case_size))
+        window.blit(self.img_warden, position_warden)
+        warden_coordinates = [position_warden[0]/case_size,position_warden[1]/case_size]
         
-        #on s'assure que l'objet n'apparait pas sur le gardien
-        while self.aiguille == coordonnee_gardien or self.tube == coordonnee_gardien or self.ether == coordonnee_gardien:
-            self.aiguille = random.choice(self.cases_vides)
-            self.tube = random.choice(self.cases_vides)
-            self.ether = random.choice(self.cases_vides)
+        #we make sure that item doesnt appear on warden
+        while self.needle == warden_coordinates or self.tube == warden_coordinates or self.ether == warden_coordinates:
+            self.needle = random.choice(self.empty_cases)
+            self.tube = random.choice(self.empty_cases)
+            self.ether = random.choice(self.empty_cases)
         else:
-            self.objets.extend([self.aiguille, self.tube, self.ether])
+            self.items.extend([self.needle, self.tube, self.ether])
             
-        # chargement et affichage du personnage
-        self.img_perso = pygame.image.load("MacGyver-40.png").convert()
-        self.img_perso.set_colorkey((255,255,255))
-        self.img_perso = pygame.transform.scale(self.img_perso, (taille_case, taille_case))
-        position_perso = self.img_perso.get_rect(topleft=(self.case_depart[0][0]*taille_case,self.case_depart[0][1]*taille_case))
-        fenetre.blit(self.img_perso, position_perso)
-        #rafraîchissement de l'écran
+        # loading and display of character
+        self.img_char = pygame.image.load("MacGyver-40.png").convert()
+        self.img_char.set_colorkey((255,255,255))
+        self.img_char = pygame.transform.scale(self.img_char, (case_size, case_size))
+        position_char = self.img_char.get_rect(topleft=(self.start_case[0][0]*case_size,self.start_case[0][1]*case_size))
+        window.blit(self.img_char, position_char)
+        #refreshing of screen
         pygame.display.flip()
 
-        #si la touche reste enfoncée, l'action se répète.
+        #if key is maintained, the action repeats
         pygame.key.set_repeat(30,100)
 
-        #boucle
-        continuer = 1
-        while continuer:
+        #loop
+        continue_game = 1
+        while continue_game:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    continuer = 0
+                    continue_game = 0
                 if event.type == KEYDOWN:
                     if event.key == K_DOWN:
-                        if Labyrinthe.get_type(self,int(position_perso[0]/taille_case),int(position_perso[1]/taille_case)+1) == "mur":
-                            print("mur , {},{}".format(int(position_perso[0]/taille_case),int(position_perso[1]/taille_case)+1))
+                        if Maze.get_type(self,int(position_char[0]/case_size),int(position_char[1]/case_size)+1) == "mur":
+                            print("mur , {},{}".format(int(position_char[0]/case_size),int(position_char[1]/case_size)+1))
                         else:
-                            position_perso = position_perso.move(0,taille_case)
+                            position_char = position_char.move(0,case_size)
                     if event.key == K_UP:
-                        if Labyrinthe.get_type(self,int(position_perso[0]/taille_case),int(position_perso[1]/taille_case)-1) == "mur":
-                            print("mur , {},{}".format(int(position_perso[0]/taille_case),int(position_perso[1]/taille_case)-1))
+                        if Maze.get_type(self,int(position_char[0]/case_size),int(position_char[1]/case_size)-1) == "mur":
+                            print("mur , {},{}".format(int(position_char[0]/case_size),int(position_char[1]/case_size)-1))
                         else:
-                            position_perso = position_perso.move(0,-taille_case)
+                            position_char = position_char.move(0,-case_size)
                     if event.key == K_LEFT:
-                        if Labyrinthe.get_type(self,int(position_perso[0]/taille_case)-1,int(position_perso[1]/taille_case)) == "mur":
-                            print("mur , {},{}".format(int(position_perso[0]/taille_case)-1,int(position_perso[1]/taille_case)))
+                        if Maze.get_type(self,int(position_char[0]/case_size)-1,int(position_char[1]/case_size)) == "mur":
+                            print("mur , {},{}".format(int(position_char[0]/case_size)-1,int(position_char[1]/case_size)))
                         else:
-                            position_perso = position_perso.move(-taille_case,0)
+                            position_char = position_char.move(-case_size,0)
                     if event.key == K_RIGHT:
-                        if Labyrinthe.get_type(self,int(position_perso[0]/taille_case)+1,int(position_perso[1]/taille_case)) == "mur":
-                            print("mur , {},{}".format(int(position_perso[0]/taille_case)+1,int(position_perso[1]/taille_case)))
+                        if Maze.get_type(self,int(position_char[0]/case_size)+1,int(position_char[1]/case_size)) == "mur":
+                            print("mur , {},{}".format(int(position_char[0]/case_size)+1,int(position_char[1]/case_size)))
                         else:
-                            position_perso = position_perso.move(taille_case,0)
+                            position_char = position_char.move(case_size,0)
 
-                #si le joueur marche sur l'objet, il le collecte
-                if position_perso == position_ether:
-                    position_ether = self.img_ether.get_rect(topleft=(taille_case*14,taille_case*15))
-                    self.objets_collectes.append("ether")
-                    print("collecté: {}".format(self.objets_collectes))
-                if position_perso == position_aiguille:
-                    position_aiguille = self.img_aiguille.get_rect(topleft=(taille_case*13,taille_case*15))
-                    self.objets_collectes.append("aiguille")
-                    print("collecté: {}".format(self.objets_collectes))
-                if position_perso == position_tube:
-                    position_tube = self.img_tube.get_rect(topleft=(taille_case*12,taille_case*15))
-                    self.objets_collectes.append("tube")
-                    print("collecté: {}".format(self.objets_collectes))
+                #if play walk on item, he collects it
+                if position_char == position_ether:
+                    position_ether = self.img_ether.get_rect(topleft=(case_size*14,case_size*15))
+                    self.collected_items.append("ether")
+                    print("collecté: {}".format(self.collected_items))
+                if position_char == position_needle:
+                    position_needle = self.img_needle.get_rect(topleft=(case_size*13,case_size*15))
+                    self.collected_items.append("needle")
+                    print("collecté: {}".format(self.collected_items))
+                if position_char == position_tube:
+                    position_tube = self.img_tube.get_rect(topleft=(case_size*12,case_size*15))
+                    self.collected_items.append("tube")
+                    print("collecté: {}".format(self.collected_items))
 
-                #si le joueur rencontre le gardien
-                if (position_perso[0]/taille_case,position_perso[1]/taille_case) == (position_gardien[0]/taille_case - 1,position_gardien[1]/taille_case):
-                    if "ether" in self.objets_collectes and "aiguille" in self.objets_collectes and "tube" in self.objets_collectes:
-                        position_gardien = position_gardien.move(0,-taille_case)
-                        print("Objets collectés: {}".format(self.objets_collectes))
+                #if play meet warden
+                if (position_char[0]/case_size,position_char[1]/case_size) == (position_warden[0]/case_size - 1,position_warden[1]/case_size):
+                    if "ether" in self.collected_items and "needle" in self.collected_items and "tube" in self.collected_items:
+                        position_warden = position_warden.move(0,-case_size)
+                        print("items collectés: {}".format(self.collected_items))
                         print("vous pouvez passer")
                     else:
-                        continuer = 0
-                        partie_gagnee = 0
+                        continue_game = 0
+                        game_won = 0
 
-                #si le joueur arrive sur la case arrivée
-                if (position_perso[0]/taille_case,position_perso[1]/taille_case) == (self.case_arrivee[0][0],self.case_arrivee[0][1]):
-                    partie_gagnee = 1
-                    continuer = 0
+                #if play get to finish
+                if (position_char[0]/case_size,position_char[1]/case_size) == (self.finish_case[0][0],self.finish_case[0][1]):
+                    game_won = 1
+                    continue_game = 0
            
 
 
             #recollage
-            afficher_cases(self)
-            fenetre.blit(self.img_ether, position_ether)
-            fenetre.blit(self.img_aiguille, position_aiguille)
-            fenetre.blit(self.img_tube, position_tube)
-            fenetre.blit(self.img_gardien, position_gardien)
-            fenetre.blit(self.img_perso, position_perso)
+            display_cases(self)
+            window.blit(self.img_ether, position_ether)
+            window.blit(self.img_needle, position_needle)
+            window.blit(self.img_tube, position_tube)
+            window.blit(self.img_warden, position_warden)
+            window.blit(self.img_char, position_char)
             
             
             #rafraichissement
             pygame.display.flip()
 
-        findugame = 1
-        while findugame:
+        endofgame = 1
+        while endofgame:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    findugame = 0
-            #Si continuer = 0
-            self.findugame = pygame.image.load("fin.png").convert()
-            self.victoire = pygame.image.load("victoire.png").convert()
-            afficher_cases(self)
-            fenetre.blit(self.img_ether, position_ether)
-            fenetre.blit(self.img_aiguille, position_aiguille)
-            fenetre.blit(self.img_tube, position_tube)
-            fenetre.blit(self.img_gardien, position_gardien)
-            fenetre.blit(self.img_perso, position_perso)
-            if partie_gagnee == 1:
-                fenetre.blit(self.victoire, (pygame.Surface.get_width(fenetre)/2, pygame.Surface.get_width(fenetre)/2))
+                    endofgame = 0
+            #if continue_game = 0
+            self.endofgame = pygame.image.load("fin.png").convert()
+            self.victory = pygame.image.load("victoire.png").convert()
+            display_cases(self)
+            window.blit(self.img_ether, position_ether)
+            window.blit(self.img_needle, position_needle)
+            window.blit(self.img_tube, position_tube)
+            window.blit(self.img_warden, position_warden)
+            window.blit(self.img_char, position_char)
+            if game_won == 1:
+                window.blit(self.victory, (pygame.Surface.get_width(window)/2, pygame.Surface.get_width(window)/2))
             else:
-                fenetre.blit(self.findugame, (pygame.Surface.get_width(fenetre)/2, pygame.Surface.get_width(fenetre)/2))
+                window.blit(self.endofgame, (pygame.Surface.get_width(window)/2, pygame.Surface.get_width(window)/2))
 
-            #rafraichissement
+            #refreshing
             pygame.display.flip()
 
     
@@ -261,7 +247,7 @@ class Labyrinthe:
 
     ### FONCTIONS ##################################################################################################
 
-    #Renvoie le type de case dont les coordonnées sont x,y
+    #Return type of the case whose coordinates are x,y
     def get_type(self,x,y):
         try:
             self.cases[x][y]
@@ -270,27 +256,26 @@ class Labyrinthe:
         else:
             return(self.cases[y][x])
 
-    #Renvoie les objets stockés dans la liste self.objets sous formes de liste de coordonnées [x,y]
-    def get_objets(self):
-        return(self.objets)
+    #Return items stored in self.items as a list of coordinates [x,y]
+    def get_items(self):
+        return(self.items)
 
-    #Pacours les items "cases" des listes "ligne" de la liste "self.cases"
-    #Si c = case, renvoie le type de c et ses coordonnées
+    #Return type and coordinates of case "c"
     def get_coord_c(self,c): 
-            liste_case_c = []
-            for ligne in self.cases:
+            my_list_case_c = []
+            for line in self.cases:
                 i = 0
-                for case in ligne:
+                for case in line:
                     if c == case:
-                        # print("case *{}* à l'emplacement ({},{}) ".format(c, i, self.cases.index(ligne) )) # c = case, renvoie le type de c et ses coordonnées
-                        liste_case_c.append([i,self.cases.index(ligne)])
+                        # print("case *{}* in position ({},{}) ".format(c, i, self.cases.index(line) )) # c = case, return type and coordinates of c
+                        my_list_case_c.append([i,self.cases.index(line)])
                         i += 1
                     else:
                         i += 1
-            return(liste_case_c)
+            return(my_list_case_c)
             
-    def get_cases_mur(self):
-        return(self.cases_mur)
+    def get_wall_case(self):
+        return(self.wall_case)
 
 
                     
@@ -300,8 +285,8 @@ class Labyrinthe:
 
 
 
-laby = Labyrinthe()
-print(laby.interface_graphique())
+laby = Maze()
+print(laby.graphic_interface())
 
 
 
