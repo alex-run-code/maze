@@ -16,17 +16,13 @@ class Maze:
 
         self.load_map("Maze.txt")
 
-        #  Generate items, and store them in self.items
-        self.needle = random.choice(self.empty_cases)
-        self.tube = random.choice(self.empty_cases)
-        self.ether = random.choice(self.empty_cases)
-
-        #  if two items are on the same case, we generate them again
-        #  TODO: regenerer uniquement l'objet qui se trouve sur un autre - utiliser del
-        while self.tube == self.needle or self.tube == self.ether or self.ether == self.needle:
-            self.needle = random.choice(self.empty_cases)
-            self.tube = random.choice(self.empty_cases)
-            self.ether = random.choice(self.empty_cases)
+        #  Generate items, then delete their case from item_cases so the next one doesnt overlap
+        self.item_cases = self.empty_cases
+        self.needle = random.choice(self.item_cases)
+        self.item_cases.remove(self.needle)
+        self.tube = random.choice(self.item_cases)
+        self.item_cases.remove(self.tube)
+        self.ether = random.choice(self.item_cases)
 
     # Storing cases in self.cases
 
