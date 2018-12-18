@@ -18,11 +18,14 @@ class Maze:
 
         #  Generate items, then delete their case from item_cases so the next one doesnt overlap
         self.item_cases = self.empty_cases
+        self.item_cases.remove([self.finish_case[0][0], self.finish_case[0][1]-1]) #removing warden case
         self.needle = random.choice(self.item_cases)
         self.item_cases.remove(self.needle)
         self.tube = random.choice(self.item_cases)
         self.item_cases.remove(self.tube)
         self.ether = random.choice(self.item_cases)
+        self.item_cases.remove(self.ether)
+        self.syringe = random.choice(self.item_cases)
 
     # Storing cases in self.cases
 
@@ -115,21 +118,30 @@ class Maze:
         self.img_tube = pygame.transform.scale(
             self.img_tube, (case_size, case_size))
         self.img_tube.set_colorkey((255, 255, 255))
+        self.img_syringe = pygame.image.load("images/syringe-40.png")
+        self.img_syringe = pygame.transform.scale(
+            self.img_syringe, (case_size, case_size))
+        self.img_syringe.set_colorkey((255, 255, 255))
         pos_img_ether_x = case_size*(self.ether[0])
         pos_img_ether_y = case_size*(self.ether[1])
         pos_img_needle_x = case_size*(self.needle[0])
         pos_img_needle_y = case_size*(self.needle[1])
         pos_img_tube_x = case_size*(self.tube[0])
         pos_img_tube_y = case_size*(self.tube[1])
+        pos_img_syringe_x = case_size*(self.syringe[0])
+        pos_img_syringe_y = case_size*(self.syringe[1])
         position_ether = self.img_ether.get_rect(
             topleft=(pos_img_ether_x, pos_img_ether_y))
         position_needle = self.img_needle.get_rect(
             topleft=(pos_img_needle_x, pos_img_needle_y))
         position_tube = self.img_tube.get_rect(
             topleft=(pos_img_tube_x, pos_img_tube_y))
+        position_syringe = self.img_syringe.get_rect(
+            topleft=(pos_img_syringe_x, pos_img_syringe_y))
         window.blit(self.img_ether, position_ether)
         window.blit(self.img_needle, position_needle)
         window.blit(self.img_tube, position_tube)
+        window.blit(self.img_syringe, position_syringe)
 
         #  loading and display of warden
         self.img_warden = pygame.image.load("images/gardien-40.png").convert()
@@ -141,14 +153,6 @@ class Maze:
         window.blit(self.img_warden, position_warden)
         warden_coordinates = [position_warden[0] /
                               case_size, position_warden[1]/case_size]
-
-        # we make sure that item doesnt appear on warden
-        while self.needle == warden_coordinates or self.tube == warden_coordinates or self.ether == warden_coordinates:
-            self.needle = random.choice(self.empty_cases)
-            self.tube = random.choice(self.empty_cases)
-            self.ether = random.choice(self.empty_cases)
-        else:
-            self.items.extend([self.needle, self.tube, self.ether])
 
         #  loading and display of character
         self.img_char = pygame.image.load("images/MacGyver-40.png").convert()
@@ -212,10 +216,15 @@ class Maze:
                         topleft=(case_size*12, case_size*15))
                     self.collected_items.append("tube")
                     print("collecté: {}".format(self.collected_items))
+                if position_char == position_syringe:
+                    position_syringe = self.img_syringe.get_rect(
+                        topleft=(case_size*11, case_size*15))
+                    self.collected_items.append("syringe")
+                    print("collecté: {}".format(self.collected_items))
 
                 # if play meet warden
                 if (position_char[0]/case_size, position_char[1]/case_size) == (position_warden[0]/case_size - 1, position_warden[1]/case_size):
-                    if "ether" in self.collected_items and "needle" in self.collected_items and "tube" in self.collected_items:
+                    if "ether" in self.collected_items and "needle" in self.collected_items and "tube" in self.collected_items and "syringe" in self.collected_items:
                         position_warden = position_warden.move(0, -case_size)
                         print("items collectés: {}".format(
                             self.collected_items))
@@ -234,6 +243,7 @@ class Maze:
             window.blit(self.img_ether, position_ether)
             window.blit(self.img_needle, position_needle)
             window.blit(self.img_tube, position_tube)
+            window.blit(self.img_syringe, position_syringe)
             window.blit(self.img_warden, position_warden)
             window.blit(self.img_char, position_char)
 
