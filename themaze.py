@@ -6,19 +6,19 @@ from pygame.locals import *
 class Maze:
 
     # Constructor
-    def __init__(self):
+    def __init__(self, map):
         self.cases = []
         self.items = []
         self.empty_cases = []
         self.wall_case = []
         self.start_case = []
         self.finish_case = []
-        self.load_map("Maze.txt")
+        self.load_map(map)
 
         #  Generate items, then delete their case from item_cases so the next one doesnt overlap
-        self.item_cases = self.empty_cases  # List of collected items
+        self.item_cases = self.empty_cases.copy()  # List of collected items
         self.item_cases.remove([self.finish_case[0][0], self.finish_case[0][1]-1])  # Removing warden case
-        self.needle = srandom.choice(self.item_cases)
+        self.needle = random.choice(self.item_cases)
         self.item_cases.remove(self.needle)
         self.tube = random.choice(self.item_cases)
         self.item_cases.remove(self.tube)
@@ -80,21 +80,12 @@ class Maze:
 
 class Graphics: 
 
-
-    def __init__(self):
+    def __init__(self, maze):
         pygame.init()
         self.case_size = 40
         self.window = pygame.display.set_mode((15*self.case_size, 16*self.case_size))
         self.collected_items = []
-
-        # Importation from class Maze()
-        self.cases = Maze().cases
-        self.ether = Maze().ether
-        self.tube = Maze().tube
-        self.needle = Maze().needle
-        self.syringe = Maze().syringe
-        self.finish_case = Maze().finish_case
-        self.start_case = Maze().start_case
+        self.maze = maze
 
         # Loading of cases' images
         self.img_empty_case = pygame.image.load("images/case-vide-40.png").convert()
@@ -134,25 +125,25 @@ class Graphics:
             self.img_warden, (self.case_size, self.case_size))
         self.img_warden.set_colorkey((255, 255, 255))
         self.position_warden = self.img_warden.get_rect(topleft=(
-            self.finish_case[0][0]*self.case_size, (self.finish_case[0][1]-1)*self.case_size))
-        self.img_char = pygame.image.load("images/MacGyver-40.png").convert()
+            self.maze.finish_case[0][0]*self.case_size, (self.maze.finish_case[0][1]-1)*self.case_size))
+        self.img_char = pygame.image.load("images/macgyver-40.png").convert()
         self.img_char.set_colorkey((255, 255, 255))
         self.img_char = pygame.transform.scale(
             self.img_char, (self.case_size, self.case_size))
         self.position_char = self.img_char.get_rect(
-            topleft=(self.start_case[0][0]*self.case_size, self.start_case[0][1]*self.case_size))
+            topleft=(self.maze.start_case[0][0]*self.case_size, self.maze.start_case[0][1]*self.case_size))
         self.endofgame = pygame.image.load("images/fin.png").convert()
         self.victory = pygame.image.load("images/victoire.png").convert()
 
         # Defining items positions
-        pos_img_ether_x = self.case_size*(self.ether[0])
-        pos_img_ether_y = self.case_size*(self.ether[1])
-        pos_img_needle_x = self.case_size*(self.needle[0])
-        pos_img_needle_y = self.case_size*(self.needle[1])
-        pos_img_tube_x = self.case_size*(self.tube[0])
-        pos_img_tube_y = self.case_size*(self.tube[1])
-        pos_img_syringe_x = self.case_size*(self.syringe[0])
-        pos_img_syringe_y = self.case_size*(self.syringe[1])
+        pos_img_ether_x = self.case_size*(self.maze.ether[0])
+        pos_img_ether_y = self.case_size*(self.maze.ether[1])
+        pos_img_needle_x = self.case_size*(self.maze.needle[0])
+        pos_img_needle_y = self.case_size*(self.maze.needle[1])
+        pos_img_tube_x = self.case_size*(self.maze.tube[0])
+        pos_img_tube_y = self.case_size*(self.maze.tube[1])
+        pos_img_syringe_x = self.case_size*(self.maze.syringe[0])
+        pos_img_syringe_y = self.case_size*(self.maze.syringe[1])
         self.position_ether = self.img_ether.get_rect(
             topleft=(pos_img_ether_x, pos_img_ether_y))
         self.position_needle = self.img_needle.get_rect(
@@ -166,7 +157,7 @@ class Graphics:
     def display_cases(self):
 
         y = 0
-        for line in self.cases:
+        for line in self.maze.cases:
             x = 0
             for case in line:
                 if case == "vide":
@@ -197,10 +188,11 @@ class Graphics:
 
     def main_loop(self):
 
+        self.display_cases()
+
         # If key is maintained, the action repeats
         pygame.key.set_repeat(30, 100)
 
-        # Main loop
         continue_game = 1
         while continue_game:
             for event in pygame.event.get():
@@ -208,25 +200,25 @@ class Graphics:
                     continue_game = 0
                 if event.type == KEYDOWN:
                     if event.key == K_DOWN:
-                        if Maze.get_type(self, int(self.position_char[0]/self.case_size), int(self.position_char[1]/self.case_size)+1) == "mur":
+                        if self.maze.get_type(int(self.position_char[0]/self.case_size), int(self.position_char[1]/self.case_size)+1) == "mur":
                             print("mur , {},{}".format(
                                 int(self.position_char[0]/self.case_size), int(self.position_char[1]/self.case_size)+1))
                         else:
                             self.position_char = self.position_char.move(0, self.case_size)
                     if event.key == K_UP:
-                        if Maze.get_type(self, int(self.position_char[0]/self.case_size), int(self.position_char[1]/self.case_size)-1) == "mur":
+                        if self.maze.get_type(int(self.position_char[0]/self.case_size), int(self.position_char[1]/self.case_size)-1) == "mur":
                             print("mur , {},{}".format(
                                 int(self.position_char[0]/self.case_size), int(self.position_char[1]/self.case_size)-1))
                         else:
                             self.position_char = self.position_char.move(0, -self.case_size)
                     if event.key == K_LEFT:
-                        if Maze.get_type(self, int(self.position_char[0]/self.case_size)-1, int(self.position_char[1]/self.case_size)) == "mur":
+                        if self.maze.get_type(int(self.position_char[0]/self.case_size)-1, int(self.position_char[1]/self.case_size)) == "mur":
                             print("mur , {},{}".format(
                                 int(self.position_char[0]/self.case_size)-1, int(self.position_char[1]/self.case_size)))
                         else:
                             self.position_char = self.position_char.move(-self.case_size, 0)
                     if event.key == K_RIGHT:
-                        if Maze.get_type(self, int(self.position_char[0]/self.case_size)+1, int(self.position_char[1]/self.case_size)) == "mur":
+                        if self.maze.get_type(int(self.position_char[0]/self.case_size)+1, int(self.position_char[1]/self.case_size)) == "mur":
                             print("mur , {},{}".format(
                                 int(self.position_char[0]/self.case_size)+1, int(self.position_char[1]/self.case_size)))
                         else:
@@ -266,12 +258,12 @@ class Graphics:
                         game_won = 0
 
                 # If play get to finish
-                if (self.position_char[0]/self.case_size, self.position_char[1]/self.case_size) == (self.finish_case[0][0], self.finish_case[0][1]):
+                if (self.position_char[0]/self.case_size, self.position_char[1]/self.case_size) == (self.maze.finish_case[0][0], self.maze.finish_case[0][1]):
                     game_won = 1
                     continue_game = 0
 
             # Re-pasting cases
-            Graphics.display_cases(self)
+            self.display_cases()
 
         endofgame = 1
         while endofgame:
@@ -279,7 +271,7 @@ class Graphics:
                 if event.type == QUIT:
                     endofgame = 0
                 if continue_game == 0:
-                    Graphics.display_cases(self)
+                    self.display_cases()
                     if game_won == 1:
                         self.window.blit(self.victory, (pygame.Surface.get_width(
                             self.window)/2, pygame.Surface.get_width(self.window)/2))
@@ -290,8 +282,10 @@ class Graphics:
                 # Refreshing
                 pygame.display.flip()
 
-# Execution
-laby = Maze()
-ig = Graphics()
-ig.display_cases()
-ig.main_loop()
+def main():
+    laby = Maze("maze.txt")
+    gui = Graphics(laby)
+    gui.main_loop()
+
+if __name__ == "__main__":
+    main()
