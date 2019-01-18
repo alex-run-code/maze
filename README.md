@@ -1,2 +1,12 @@
-# maze
-My maze game
+# TheMaze
+My maze game.
+
+## Installation 
+
+`pip install -r requirement.txt`
+
+## Usage 
+
+`python themaze.py`
+
+
