@@ -1,6 +1,6 @@
 import random
 import pygame
-from pygame.locals import *
+from pygame.locals import KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, QUIT
 
 
 class Maze:
@@ -34,7 +34,7 @@ class Maze:
                 self.cases.append(my_list)
             for line in self.cases:
                 i = 0
-                i_line = self.cases.index(line)
+                i_line = self.cases.index(line) #TODO
                 for case in line:
                     if "vide" == case:
                         self.empty_cases.append([i, i_line])
@@ -45,8 +45,6 @@ class Maze:
                     if "arrivee" == case:
                         self.finish_case.append([i, i_line])
                     i += 1
-
-    # Fonctions 
 
     # Return type of the case whose coordinates are x,y
     def get_type(self, x, y):
@@ -70,7 +68,7 @@ class Maze:
                 if c == case:
                     my_list_case_c.append([i, self.cases.index(line)])
                     i += 1
-                else:
+                else: #TODO
                     i += 1
         return(my_list_case_c)
 
@@ -78,7 +76,7 @@ class Maze:
         return(self.wall_case)
 
 
-class Graphics: 
+class Graphics:
 
     def __init__(self, maze):
         pygame.init()
@@ -88,7 +86,7 @@ class Graphics:
         self.maze = maze
 
         # Loading of cases' images
-        self.img_empty_case = pygame.image.load("images/case-vide-40.png").convert()
+        self.img_empty_case = pygame.image.load("images/case-vide-40.png").convert() #TODO, #utiliser OS path join
         self.img_empty_case = pygame.transform.scale(
             self.img_empty_case, (self.case_size, self.case_size))
         self.img_case_wall = pygame.image.load("images/case-mur-40.png").convert()
@@ -136,7 +134,7 @@ class Graphics:
         self.victory = pygame.image.load("images/victoire.png").convert()
 
         # Defining items positions
-        pos_img_ether_x = self.case_size*(self.maze.ether[0])
+        pos_img_ether_x = self.case_size*(self.maze.ether[0]) #TODO créer classe objet
         pos_img_ether_y = self.case_size*(self.maze.ether[1])
         pos_img_needle_x = self.case_size*(self.maze.needle[0])
         pos_img_needle_y = self.case_size*(self.maze.needle[1])
@@ -174,15 +172,13 @@ class Graphics:
                                 (x*self.case_size, y*self.case_size))
                 x += 1
             y += 1
- 
+
         # Bliting items, char and warden images, and refreshing
         self.window.blit(self.img_ether, self.position_ether)
         self.window.blit(self.img_needle, self.position_needle)
         self.window.blit(self.img_tube, self.position_tube)
         self.window.blit(self.img_syringe, self.position_syringe)
         self.window.blit(self.img_warden, self.position_warden)
-        warden_coordinates = [self.position_warden[0] /
-                            self.case_size, self.position_warden[1]/self.case_size]
         self.window.blit(self.img_char, self.position_char)
         pygame.display.flip()
 
@@ -282,10 +278,12 @@ class Graphics:
                 # Refreshing
                 pygame.display.flip()
 
+
 def main():
     laby = Maze("maze.txt")
     gui = Graphics(laby)
     gui.main_loop()
+
 
 if __name__ == "__main__":
     main()
