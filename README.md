@@ -7,6 +7,6 @@ My maze game.
 
 ## Usage 
 
-`python themaze.py`
+`python startgame.py`
 
 
