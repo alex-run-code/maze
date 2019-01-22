@@ -32,10 +32,8 @@ class Maze:
             for line in my_file.readlines():
                 my_list = line.split()
                 self.cases.append(my_list)
-            for line in self.cases:
-                i = 0
-                i_line = self.cases.index(line) #TODO
-                for case in line:
+            for i_line, line in enumerate(self.cases):
+                for i, case in enumerate(line):
                     if "vide" == case:
                         self.empty_cases.append([i, i_line])
                     if "mur" == case:
@@ -44,7 +42,6 @@ class Maze:
                         self.start_case.append([i, i_line])
                     if "arrivee" == case:
                         self.finish_case.append([i, i_line])
-                    i += 1
 
     # Return type of the case whose coordinates are x,y
     def get_type(self, x, y):
@@ -58,19 +55,6 @@ class Maze:
     # Return items stored in self.items as a list of coordinates [x,y]
     def get_items(self):
         return(self.items)
-
-    # Return type and coordinates of case "c"
-    def get_coord_c(self, c):
-        my_list_case_c = []
-        for line in self.cases:
-            i = 0
-            for case in line:
-                if c == case:
-                    my_list_case_c.append([i, self.cases.index(line)])
-                    i += 1
-                else: #TODO
-                    i += 1
-        return(my_list_case_c)
 
     def get_wall_case(self):
         return(self.wall_case)
@@ -86,48 +70,22 @@ class Graphics:
         self.maze = maze
 
         # Loading of cases' images
-        self.img_empty_case = pygame.image.load("images/case-vide-40.png").convert() #TODO, #utiliser OS path join
-        self.img_empty_case = pygame.transform.scale(
-            self.img_empty_case, (self.case_size, self.case_size))
-        self.img_case_wall = pygame.image.load("images/case-mur-40.png").convert()
-        self.img_case_wall = pygame.transform.scale(
-            self.img_case_wall, (self.case_size, self.case_size))
-        self.img_start_case = pygame.image.load("images/case-depart-40.png").convert()
-        self.img_start_case = pygame.transform.scale(
-            self.img_start_case, (self.case_size, self.case_size))
-        self.img_finish_case = pygame.image.load("images/case-arrivee-40.png").convert()
-        self.img_finish_case = pygame.transform.scale(
-            self.img_finish_case, (self.case_size, self.case_size))
+        self.img_empty_case = self.load_image("images/case-vide-40.png")
+        self.img_case_wall = self.load_image("images/case-mur-40.png")
+        self.img_start_case = self.load_image("images/case-depart-40.png")
+        self.img_finish_case = self.load_image("images/case-arrivee-40.png")
 
         # Loading of items' images
-        self.img_ether = pygame.image.load("images/ether-40.png").convert()
-        self.img_ether = pygame.transform.scale(
-            self.img_ether, (self.case_size, self.case_size))
-        self.img_ether.set_colorkey((255, 255, 255))
-        self.img_needle = pygame.image.load("images/needle-40.png")
-        self.img_needle = pygame.transform.scale(
-            self.img_needle, (self.case_size, self.case_size))
-        self.img_needle.set_colorkey((255, 255, 255))
-        self.img_tube = pygame.image.load("images/tube-40.png")
-        self.img_tube = pygame.transform.scale(
-            self.img_tube, (self.case_size, self.case_size))
-        self.img_tube.set_colorkey((255, 255, 255))
-        self.img_syringe = pygame.image.load("images/syringe-40.png")
-        self.img_syringe = pygame.transform.scale(
-            self.img_syringe, (self.case_size, self.case_size))
-        self.img_syringe.set_colorkey((255, 255, 255))
+        self.img_ether = self.load_image("images/ether-40.png")
+        self.img_needle = self.load_image("images/needle-40.png")
+        self.img_tube = self.load_image("images/tube-40.png")
+        self.img_syringe = self.load_image("images/syringe-40.png")
 
         # Loading of character, warden, victory and endofgame images
-        self.img_warden = pygame.image.load("images/gardien-40.png").convert()
-        self.img_warden = pygame.transform.scale(
-            self.img_warden, (self.case_size, self.case_size))
-        self.img_warden.set_colorkey((255, 255, 255))
+        self.img_warden = self.load_image("images/gardien-40.png")
         self.position_warden = self.img_warden.get_rect(topleft=(
             self.maze.finish_case[0][0]*self.case_size, (self.maze.finish_case[0][1]-1)*self.case_size))
-        self.img_char = pygame.image.load("images/macgyver-40.png").convert()
-        self.img_char.set_colorkey((255, 255, 255))
-        self.img_char = pygame.transform.scale(
-            self.img_char, (self.case_size, self.case_size))
+        self.img_char = self.load_image("images/macgyver-40.png")
         self.position_char = self.img_char.get_rect(
             topleft=(self.maze.start_case[0][0]*self.case_size, self.maze.start_case[0][1]*self.case_size))
         self.endofgame = pygame.image.load("images/fin.png").convert()
@@ -150,6 +108,14 @@ class Graphics:
             topleft=(pos_img_tube_x, pos_img_tube_y))
         self.position_syringe = self.img_syringe.get_rect(
             topleft=(pos_img_syringe_x, pos_img_syringe_y))
+
+    def load_image(self, path):
+        image = pygame.image.load(path)
+        converted_image = image.convert()
+        scaled_image = pygame.transform.scale(
+            converted_image, (self.case_size, self.case_size)
+        )
+        return scaled_image
 
     # Bliting images of the cases
     def display_cases(self):
@@ -189,34 +155,30 @@ class Graphics:
         # If key is maintained, the action repeats
         pygame.key.set_repeat(30, 100)
 
-        continue_game = 1
+        continue_game = True
         while continue_game:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    continue_game = 0
+                    continue_game = False
                 if event.type == KEYDOWN:
                     if event.key == K_DOWN:
                         if self.maze.get_type(int(self.position_char[0]/self.case_size), int(self.position_char[1]/self.case_size)+1) == "mur":
-                            print("mur , {},{}".format(
-                                int(self.position_char[0]/self.case_size), int(self.position_char[1]/self.case_size)+1))
+                            pass
                         else:
                             self.position_char = self.position_char.move(0, self.case_size)
                     if event.key == K_UP:
                         if self.maze.get_type(int(self.position_char[0]/self.case_size), int(self.position_char[1]/self.case_size)-1) == "mur":
-                            print("mur , {},{}".format(
-                                int(self.position_char[0]/self.case_size), int(self.position_char[1]/self.case_size)-1))
+                            pass
                         else:
                             self.position_char = self.position_char.move(0, -self.case_size)
                     if event.key == K_LEFT:
                         if self.maze.get_type(int(self.position_char[0]/self.case_size)-1, int(self.position_char[1]/self.case_size)) == "mur":
-                            print("mur , {},{}".format(
-                                int(self.position_char[0]/self.case_size)-1, int(self.position_char[1]/self.case_size)))
+                            pass
                         else:
                             self.position_char = self.position_char.move(-self.case_size, 0)
                     if event.key == K_RIGHT:
                         if self.maze.get_type(int(self.position_char[0]/self.case_size)+1, int(self.position_char[1]/self.case_size)) == "mur":
-                            print("mur , {},{}".format(
-                                int(self.position_char[0]/self.case_size)+1, int(self.position_char[1]/self.case_size)))
+                            pass
                         else:
                             self.position_char = self.position_char.move(self.case_size, 0)
 
@@ -250,25 +212,25 @@ class Graphics:
                             self.collected_items))
                         print("vous pouvez passer")
                     else:
-                        continue_game = 0
-                        game_won = 0
+                        continue_game = False
+                        game_won = False
 
                 # If play get to finish
                 if (self.position_char[0]/self.case_size, self.position_char[1]/self.case_size) == (self.maze.finish_case[0][0], self.maze.finish_case[0][1]):
-                    game_won = 1
-                    continue_game = 0
+                    game_won = True
+                    continue_game = False
 
             # Re-pasting cases
             self.display_cases()
 
-        endofgame = 1
+        endofgame = True
         while endofgame:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    endofgame = 0
-                if continue_game == 0:
+                    endofgame = False
+                if continue_game == False:
                     self.display_cases()
-                    if game_won == 1:
+                    if game_won == True:
                         self.window.blit(self.victory, (pygame.Surface.get_width(
                             self.window)/2, pygame.Surface.get_width(self.window)/2))
                     else:
