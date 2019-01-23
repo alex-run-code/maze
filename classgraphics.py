@@ -1,4 +1,5 @@
 import pygame
+import os
 from pygame.locals import KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, QUIT
 
 
@@ -13,28 +14,30 @@ class Graphics:
         self.maze = maze
 
         # Loading of cases' images
-        self.img_empty_case = self.load_image("images/case-vide-40.png")
-        self.img_case_wall = self.load_image("images/case-mur-40.png")
-        self.img_start_case = self.load_image("images/case-depart-40.png")
-        self.img_finish_case = self.load_image("images/case-arrivee-40.png")
+        self.img_empty_case = self.load_image("case-vide-40.png")
+        self.img_case_wall = self.load_image("case-mur-40.png")
+        self.img_start_case = self.load_image("case-depart-40.png")
+        self.img_finish_case = self.load_image("case-arrivee-40.png")
 
         # Loading of items' images
-        self.img_ether = self.load_image("images/ether-40.png")
-        self.img_needle = self.load_image("images/needle-40.png")
-        self.img_tube = self.load_image("images/tube-40.png")
-        self.img_syringe = self.load_image("images/syringe-40.png")
+        self.img_ether = self.load_image("ether-40.png")
+        self.img_needle = self.load_image("needle-40.png")
+        self.img_tube = self.load_image("tube-40.png")
+        self.img_syringe = self.load_image("syringe-40.png")
 
         # Loading of character, warden, victory and endofgame images
-        self.img_warden = self.load_image("images/gardien-40.png")
+        self.img_warden = self.load_image("gardien-40.png")
         self.position_warden = self.img_warden.get_rect(topleft=(
             self.maze.finish_case[0][0]*self.case_size, (
                 self.maze.finish_case[0][1]-1)*self.case_size))
-        self.img_char = self.load_image("images/macgyver-40.png")
+        self.img_char = self.load_image("macgyver-40.png")
         self.position_char = self.img_char.get_rect(
             topleft=(self.maze.start_case[0][0]*self.case_size, (
                 self.maze.start_case[0][1]*self.case_size)))
-        self.endofgame = pygame.image.load("images/fin.png").convert()
-        self.victory = pygame.image.load("images/victoire.png").convert()
+        self.endofgame = pygame.image.load(
+            os.path.join("images", "fin.png")).convert()
+        self.victory = pygame.image.load(
+            os.path.join("images", "victoire.png")).convert()
 
         # Defining items positions
         self.position_ether = self.pos(self.img_ether, self.maze.ether)
@@ -48,7 +51,7 @@ class Graphics:
         return pos_item
 
     def load_image(self, path):
-        image = pygame.image.load(path)
+        image = pygame.image.load(os.path.join("images", path))
         converted_image = image.convert()
         scaled_image = pygame.transform.scale(
             converted_image, (self.case_size, self.case_size)
